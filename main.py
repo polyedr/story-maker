@@ -5,6 +5,7 @@ from typing import Optional
 from positions import list_of_strings_positions
 from strings import list_of_strings, stop_words
 from itertools import repeat
+import itertools
 
 
 class TextFormatter:
@@ -19,18 +20,30 @@ class TextFormatter:
     def get_as_list(self, username: str) -> list:
         e_strings = []
         # Linearization of the positions
-        flat_positions = [item for sublist in self.positions for item in sublist]
+        # print(self.positions)
+        # flat_positions = list(itertools.chain.from_iterable(self.positions))
+        flat_positions = []
+
+        for i in self.positions:
+            if isinstance(i, list):
+                flat_positions.extend(i)
+            else:
+                flat_positions.append(i)
+
         # Create an initial dictionary
         dict_strings = dict(zip(self.strings, self.positions))
-        # Multiplicating of the strings
-        for key, value in dict_strings:
-            if len(value) == 1:
+
+        # # Multiplicating of the strings
+
+        for key, value in dict_strings.items():
+            if isinstance(value, int):
                 e_strings.append(key)
             else:
-                e_strings.extend(repeat(key, len(value)))
+                e_strings.extend([key] * len(value))
 
         # Obtaining the ordered strings
         ordered_strings = [x for _, x in sorted(zip(flat_positions, e_strings))]
+        print("ordered_strings", ordered_strings)
         # Username replacement
         ordered_strings = [
             i.replace("{username}", arguments.username) for i in ordered_strings
@@ -47,6 +60,7 @@ class TextFormatter:
         :param username: Имя пользователя
         :return: Список слов в правильном порядке
         """
+
         return self.strings
 
     def get_as_text(self, username: str) -> str:
@@ -70,16 +84,18 @@ class TextFormatter:
         return sentences
 
 
-formatter = TextFormatter(list_of_strings, list_of_strings_positions, stop_words)
+if __name__ == "__main__":
+    formatter = TextFormatter(list_of_strings, list_of_strings_positions, stop_words)
 
-arguments_parser = argparse.ArgumentParser(
-    prog="python main.py", description="Консольный рассказчик."
-)
-arguments_parser.add_argument(
-    "-u", "--username", action="store", help="Имя пользователя в истории"
-)
+    arguments_parser = argparse.ArgumentParser(
+        prog="python main.py", description="Консольный рассказчик."
+    )
+    arguments_parser.add_argument(
+        "-u", "--username", action="store", help="Имя пользователя в истории"
+    )
 
-arguments = arguments_parser.parse_args()
+    arguments = arguments_parser.parse_args()
 
-if arguments.username:
-    print(formatter.get_as_text(arguments.username))
+    if arguments.username:
+        print(formatter.get_as_text(arguments.username))
+    formatter.get_as_list(arguments.username)
