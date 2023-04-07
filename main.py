@@ -8,7 +8,9 @@ from itertools import repeat
 
 
 class TextFormatter:
-    def __init__(self, strings: list, positions: list, stop_words: Optional[list] = None):
+    def __init__(
+        self, strings: list, positions: list, stop_words: Optional[list] = None
+    ):
         self.strings = strings
         self.filtered_strings = []
         self.positions = positions
@@ -26,12 +28,14 @@ class TextFormatter:
             if len(value) == 1:
                 e_strings.append(key)
             else:
-                e_strings.extend(repeat(key,len(value)))
+                e_strings.extend(repeat(key, len(value)))
 
         # Obtaining the ordered strings
         ordered_strings = [x for _, x in sorted(zip(flat_positions, e_strings))]
         # Username replacement
-        ordered_strings = [i.replace('{username}', arguments.username) for i in ordered_strings]
+        ordered_strings = [
+            i.replace("{username}", arguments.username) for i in ordered_strings
+        ]
         # Move out the stop words
         ordered_strings = [x for x in ordered_strings if x not in self.stop_words]
 
@@ -47,9 +51,14 @@ class TextFormatter:
         return self.strings
 
     def get_as_text(self, username: str) -> str:
-        ordered_strings = [i.replace('{username}', arguments.username) for i in self.strings]
+        ordered_strings = [
+            i.replace("{username}", arguments.username) for i in self.strings
+        ]
         ordered_strings = [x for x in ordered_strings if x not in self.stop_words]
-        text = str(ordered_strings)
+        text = " ".join(ordered_strings)
+        sentences = ". ".join(
+            list(map(lambda x: x.strip().capitalize(), text.split(".")))
+        )
         """
         Метод возвращает текст, сформированный из списка слов и позиций.
         В возвращаемом тексте не должно быть стоп-слов.
@@ -59,16 +68,17 @@ class TextFormatter:
         :param username: Имя пользователя
         :return: Текст, отформатированный согласно условиям задачи
         """
-        return text
+        return sentences
 
 
 formatter = TextFormatter(list_of_strings, list_of_strings_positions, stop_words)
 
-arguments_parser = argparse.ArgumentParser(prog="python main.py", description="Консольный рассказчик.")
-arguments_parser.add_argument('-u',
-                              '--username',
-                              action='store',
-                              help='Имя пользователя в истории')
+arguments_parser = argparse.ArgumentParser(
+    prog="python main.py", description="Консольный рассказчик."
+)
+arguments_parser.add_argument(
+    "-u", "--username", action="store", help="Имя пользователя в истории"
+)
 
 arguments = arguments_parser.parse_args()
 
