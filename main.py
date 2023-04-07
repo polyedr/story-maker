@@ -4,15 +4,39 @@ from typing import Optional
 
 from positions import list_of_strings_positions
 from strings import list_of_strings, stop_words
+from itertools import repeat
 
 
 class TextFormatter:
     def __init__(self, strings: list, positions: list, stop_words: Optional[list] = None):
         self.strings = strings
+        self.filtered_strings = []
         self.positions = positions
         self.stop_words = stop_words if stop_words else []
 
     def get_as_list(self, username: str) -> list:
+        e_strings = []
+        # Linearization of the positions
+        flat_positions = [item for sublist in self.positions for item in sublist]
+        # Create an initial dictionary
+        dict_strings = dict(zip(self.strings, self.positions))
+        # Multiplicating of the strings
+        # Decifer multiple symbols
+        for key, value in dict_strings:
+            if len(value) == 1:
+                e_strings.append(key)
+            else:
+                e_strings.extend(repeat(key,len(value)))
+
+        # Obtaining the ordered strings
+        ordered_strings = [x for _, x in sorted(zip(flat_positions, e_strings))]
+        # Username replacement
+        ordered_strings = [i.replace('{username}', arguments.username) for i in ordered_strings]
+        # Move out the stop words
+        ordered_strings = [x for x in ordered_strings if x not in self.stop_words]
+
+        self.filtered_strings = ordered_strings
+        self.strings = ordered_strings
         """
         Метод возвращает правильно сформированный список слов итогового текста.
         Среди возвращаемых элементов не должно содержаться слов из списка стоп-слов.
@@ -20,9 +44,12 @@ class TextFormatter:
         :param username: Имя пользователя
         :return: Список слов в правильном порядке
         """
-        pass
+        return self.strings
 
     def get_as_text(self, username: str) -> str:
+        ordered_strings = [i.replace('{username}', arguments.username) for i in self.strings]
+        ordered_strings = [x for x in ordered_strings if x not in self.stop_words]
+        text = str(ordered_strings)
         """
         Метод возвращает текст, сформированный из списка слов и позиций.
         В возвращаемом тексте не должно быть стоп-слов.
@@ -32,7 +59,7 @@ class TextFormatter:
         :param username: Имя пользователя
         :return: Текст, отформатированный согласно условиям задачи
         """
-        pass
+        return text
 
 
 formatter = TextFormatter(list_of_strings, list_of_strings_positions, stop_words)
