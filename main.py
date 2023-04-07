@@ -12,7 +12,7 @@ class TextFormatter:
         self, strings: list, positions: list, stop_words: Optional[list] = None
     ):
         self.strings = strings
-        self.filtered_strings = []
+        # self.filtered_strings = []
         self.positions = positions
         self.stop_words = stop_words if stop_words else []
 
@@ -23,7 +23,6 @@ class TextFormatter:
         # Create an initial dictionary
         dict_strings = dict(zip(self.strings, self.positions))
         # Multiplicating of the strings
-        # Decifer multiple symbols
         for key, value in dict_strings:
             if len(value) == 1:
                 e_strings.append(key)
