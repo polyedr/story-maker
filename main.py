@@ -42,12 +42,13 @@ class TextFormatter:
 
         # Obtaining the ordered strings
         ordered_strings = [x for _, x in sorted(zip(flat_positions, e_strings))]
+
         # Username replacement
         ordered_strings = [i.replace("{username}", username) for i in ordered_strings]
+
         # Move out the stop words
         ordered_strings = [x for x in ordered_strings if x not in self.stop_words]
 
-        self.filtered_strings = ordered_strings
         self.strings = ordered_strings
 
         return self.strings
@@ -66,8 +67,11 @@ class TextFormatter:
 
         # Capitalize the first word
         ordered_strings[0] = ordered_strings[0].capitalize()
-        delimiters = {".", "?", "!"}
-        delimiters_plus = {".", "?", "!", ","}
+
+        # Define the delimiters
+        delimiters = frozenset({".", "?", "!"})
+        delimiters_plus = frozenset({".", "?", "!", ","})
+
         for i in range(len(ordered_strings) - 1):
             if ordered_strings[i] in delimiters:
                 ordered_strings[i + 1] = ordered_strings[i + 1].capitalize()
@@ -79,7 +83,6 @@ class TextFormatter:
                 text += ordered_strings[i]
             elif ordered_strings[i] in delimiters_plus:
                 text += ordered_strings[i]
-
             else:
                 text += " "
                 text += ordered_strings[i]
