@@ -1,11 +1,7 @@
 import argparse
-
 from typing import Optional
-
 from positions import list_of_strings_positions
 from strings import list_of_strings, stop_words
-from itertools import repeat
-import itertools
 
 
 class TextFormatter:
@@ -13,15 +9,19 @@ class TextFormatter:
         self, strings: list, positions: list, stop_words: Optional[list] = None
     ):
         self.strings = strings
-        # self.filtered_strings = []
         self.positions = positions
         self.stop_words = stop_words if stop_words else []
 
     def get_as_list(self, username: str) -> list:
+        """
+        Метод возвращает правильно сформированный список слов итогового текста.
+        Среди возвращаемых элементов не должно содержаться слов из списка стоп-слов.
+        Элементы списка, содержащие шаблон {username}, должны быть заменены на значение переменной username.
+        :param username: Имя пользователя
+        :return: Список слов в правильном порядке
+        """
         e_strings = []
         # Linearization of the positions
-        # print(self.positions)
-        # flat_positions = list(itertools.chain.from_iterable(self.positions))
         flat_positions = []
 
         for i in self.positions:
@@ -33,8 +33,7 @@ class TextFormatter:
         # Create an initial dictionary
         dict_strings = dict(zip(self.strings, self.positions))
 
-        # # Multiplicating of the strings
-
+        # Multiplicating of the strings
         for key, value in dict_strings.items():
             if isinstance(value, int):
                 e_strings.append(key)
@@ -43,35 +42,17 @@ class TextFormatter:
 
         # Obtaining the ordered strings
         ordered_strings = [x for _, x in sorted(zip(flat_positions, e_strings))]
-        print("ordered_strings", ordered_strings)
         # Username replacement
-        ordered_strings = [
-            i.replace("{username}", arguments.username) for i in ordered_strings
-        ]
+        ordered_strings = [i.replace("{username}", username) for i in ordered_strings]
         # Move out the stop words
         ordered_strings = [x for x in ordered_strings if x not in self.stop_words]
 
         self.filtered_strings = ordered_strings
         self.strings = ordered_strings
-        """
-        Метод возвращает правильно сформированный список слов итогового текста.
-        Среди возвращаемых элементов не должно содержаться слов из списка стоп-слов.
-        Элементы списка, содержащие шаблон {username}, должны быть заменены на значение переменной username.
-        :param username: Имя пользователя
-        :return: Список слов в правильном порядке
-        """
 
         return self.strings
 
     def get_as_text(self, username: str) -> str:
-        ordered_strings = [
-            i.replace("{username}", arguments.username) for i in self.strings
-        ]
-        ordered_strings = [x for x in ordered_strings if x not in self.stop_words]
-        text = " ".join(ordered_strings)
-        sentences = ". ".join(
-            list(map(lambda x: x.strip().capitalize(), text.split(".")))
-        )
         """
         Метод возвращает текст, сформированный из списка слов и позиций.
         В возвращаемом тексте не должно быть стоп-слов.
@@ -81,7 +62,29 @@ class TextFormatter:
         :param username: Имя пользователя
         :return: Текст, отформатированный согласно условиям задачи
         """
-        return sentences
+        ordered_strings = self.get_as_list(username)
+
+        # Capitalize the first word
+        ordered_strings[0] = ordered_strings[0].capitalize()
+        delimiters = {".", "?", "!"}
+        delimiters_plus = {".", "?", "!", ","}
+        for i in range(len(ordered_strings) - 1):
+            if ordered_strings[i] in delimiters:
+                ordered_strings[i + 1] = ordered_strings[i + 1].capitalize()
+
+        # Assemble the strings
+        text = ""
+        for i in range(len(ordered_strings)):
+            if i == 0:
+                text += ordered_strings[i]
+            elif ordered_strings[i] in delimiters_plus:
+                text += ordered_strings[i]
+
+            else:
+                text += " "
+                text += ordered_strings[i]
+
+        return text
 
 
 if __name__ == "__main__":
@@ -98,4 +101,4 @@ if __name__ == "__main__":
 
     if arguments.username:
         print(formatter.get_as_text(arguments.username))
-    formatter.get_as_list(arguments.username)
+        # print(formatter.get_as_list(arguments.username))
